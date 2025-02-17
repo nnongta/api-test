@@ -1,9 +1,13 @@
-from fastapi.testclient import TestClient
-from main import app
+import unittest
+from app import app
 
-client = TestClient(app)
+class TestAPI(unittest.TestCase):
+    def setUp(self):
+        self.client = app.test_client()
 
-def test_plus():
-    response = client.get("/plus/5/6")
-    assert response.status_code == 200
-    assert response.json() == {"result": 11}
+    def test_plus(self):
+        response = self.client.get('/plus/5/6')
+        self.assertEqual(response.data.decode(), '11')
+
+if __name__ == '__main__':
+    unittest.main()

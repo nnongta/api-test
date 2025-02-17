@@ -1,11 +1,14 @@
-from fastapi import FastAPI
+from flask import Flask
 
-app = FastAPI()
+app = Flask(__name__)
 
-@app.get("/getcode")
+@app.route('/getcode')
 def get_code():
-    return {"code": "123ABC"}
+    return "Hello, this is your code!"
 
-@app.get("/plus/{a}/{b}")
-def plus(a: int, b: int):
-    return {"result": a + b}
+@app.route('/plus/<int:num1>/<int:num2>')
+def plus(num1, num2):
+    return str(num1 + num2)
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000)

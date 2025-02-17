@@ -1,0 +1,69 @@
+pipeline {
+    agent any
+    environment {
+        REGISTRY = "ghcr.io/yourusername"
+        IMAGE_NAME = "simple-api"
+        IMAGE_TAG = "latest"
+    }
+    stages {
+        stage('Clone Repo') {
+            steps {
+                git branch: 'main', url: 'https://github.com/yourusername/simple-api.git'
+            }
+        }
+        stage('Run Unit Tests') {
+            steps {
+                sh 'python -m unittest test_api.py'
+            }
+        }
+        stage('Build Docker Image') {
+            steps {
+                sh 'docker build -t $REGISTRY/$IMAGE_NAME:$IMAGE_TAG .'
+            }
+        }
+        stage('Push to Registry') {
+            steps {
+                withDockerRegistry([credentialsId: 'github-credentials', url: "https://ghcr.io"]) {
+                    sh 'docker push $REGISTRY/$IMAGE_NAME:$IMAGE_TAG'
+                }
+            }
+        }
+        stage('Deploy to VM2') {
+            steps {
+                sshagent(['vm2-ssh-key']) {
+                    sh '''
+                    ssh user@vm2 << EOF
+                    docker pull $REGISTRY/$IMAGE_NAME:$IMAGE_TAG
+                    docker run -d -p 5000:5000 $REGISTRY/$IMAGE_NAME:$IMAGE_TAG
+                    EOF
+                    '''
+                }
+            }
+        }
+        stage('Run Robot Tests') {
+            steps {
+                sshagent(['vm2-ssh-key']) {
+                    sh '''
+                    ssh user@vm2 << EOF
+                    git clone https://github.com/yourusername/robot-tests.git
+                    cd robot-tests
+                    robot test_plus.robot
+                    EOF
+                    '''
+                }
+            }
+        }
+        stage('Deploy to VM3 (Pre-Prod)') {
+            steps {
+                sshagent(['vm3-ssh-key']) {
+                    sh '''
+                    ssh user@vm3 << EOF
+                    docker pull $REGISTRY/$IMAGE_NAME:$IMAGE_TAG
+                    docker run -d -p 5000:5000 $REGISTRY/$IMAGE_NAME:$IMAGE_TAG
+                    EOF
+                    '''
+                }
+            }
+        }
+    }
+}
