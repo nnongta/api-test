@@ -1,5 +1,7 @@
 pipeline {
-    agent any
+    agent {
+        label 'test-agent'
+    }
     environment {
         REGISTRY = "ghcr.io/nnongta"
         IMAGE_NAME = "simple-api"
