@@ -26,7 +26,7 @@ pipeline {
         }
         stage('Push to Registry') {
             steps {
-                withDockerRegistry([credentialsId: 'github-credentials', url: "https://ghcr.io"]) {
+                withDockerRegistry([credentialsId: 'thanita', url: "https://ghcr.io"]) {
                     sh 'docker push $REGISTRY/$IMAGE_NAME:$IMAGE_TAG'
                 }
             }
