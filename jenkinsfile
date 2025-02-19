@@ -1,14 +1,14 @@
 pipeline {
     agent any
     environment {
-        REGISTRY = "ghcr.io/yourusername"
+        REGISTRY = "ghcr.io/nnongta"
         IMAGE_NAME = "simple-api"
         IMAGE_TAG = "latest"
     }
     stages {
         stage('Clone Repo') {
             steps {
-                git branch: 'main', url: 'https://github.com/yourusername/simple-api.git'
+                git branch: 'main', url: 'https://github.com/nnongta/api-test.git'
             }
         }
         stage('Run Unit Tests') {
