@@ -16,7 +16,7 @@ pipeline {
         stage('Run Unit Tests') {
             steps {
                 sh 'pip install -r requirement.txt'
-                sh 'python test_main.py'
+                sh 'python3 test_main.py'
             }
         }
         stage('Build Docker Image') {
