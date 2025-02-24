@@ -33,9 +33,12 @@ pipeline {
         stage('Push to Registry') {
             agent { label 'vm2' }
             steps {
-                withDockerRegistry([credentialsId: 'github-access', url: "https://ghcr.io"]) {
-                    sh 'docker push $REGISTRY/$IMAGE_NAME:$IMAGE_TAG'
-                }
+                withCredentials([usernamePassword(credentialsId: 'github-access', usernameVariable: 'USERNAME', passwordVariable: 'TOKEN')]) {
+    sh '''
+    echo $TOKEN | docker login ghcr.io -u $USERNAME --password-stdin
+    '''
+}
+
             }
         }
         stage('Deploy to VM2') {
