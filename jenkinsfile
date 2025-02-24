@@ -34,10 +34,10 @@ pipeline {
             agent { label 'vm2' }
             steps {
                 withCredentials([usernamePassword(credentialsId: 'github-access', usernameVariable: 'USERNAME', passwordVariable: 'TOKEN')]) {
-    sh '''
-    echo $TOKEN | docker login ghcr.io -u $USERNAME --password-stdin
-    '''
-}
+                    sh '''
+                    echo $TOKEN | docker login ghcr.io -u $USERNAME --password-stdin
+                    '''
+                }
 
             }
         }
