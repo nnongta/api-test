@@ -1,7 +1,4 @@
 pipeline {
-    agent {
-        label 'test-agent'
-    }
     environment {
         REGISTRY = "ghcr.io/nnongta"
         IMAGE_NAME = "simple-api"
@@ -9,22 +6,26 @@ pipeline {
     }
     stages {
         stage('Clone Repo') {
+            agent { label 'vm2' }
             steps {
                 git branch: 'main', url: 'https://github.com/nnongta/api-test.git'
             }
         }
         stage('Run Unit Tests') {
+            agent { label 'vm2' }
             steps {
                 sh 'pip install -r requirement.txt'
                 sh 'python3 test_main.py'
             }
         }
         stage('Build Docker Image') {
+            agent { label 'vm2' }
             steps {
                 sh 'docker build -t $REGISTRY/$IMAGE_NAME:$IMAGE_TAG .'
             }
         }
         stage('Push to Registry') {
+            agent { label 'vm2' }
             steps {
                 withDockerRegistry([credentialsId: 'thanita', url: "https://ghcr.io"]) {
                     sh 'docker push $REGISTRY/$IMAGE_NAME:$IMAGE_TAG'
@@ -32,40 +33,31 @@ pipeline {
             }
         }
         stage('Deploy to VM2') {
+            agent { label 'vm2' }
             steps {
-                sshagent(['vm2-ssh-key']) {
-                    sh '''
-                    ssh user@vm2 << EOF
-                    docker pull $REGISTRY/$IMAGE_NAME:$IMAGE_TAG
-                    docker run -d -p 5000:5000 $REGISTRY/$IMAGE_NAME:$IMAGE_TAG
-                    EOF
-                    '''
-                }
+                sh '''
+                docker pull $REGISTRY/$IMAGE_NAME:$IMAGE_TAG
+                docker run -d -p 5000:5000 $REGISTRY/$IMAGE_NAME:$IMAGE_TAG
+                '''
             }
         }
-        stage('Run Robot Tests') {
+        stage('Run Robot Tests on VM2') {
+            agent { label 'vm2' }
             steps {
-                sshagent(['vm2-ssh-key']) {
-                    sh '''
-                    ssh user@vm2 << EOF
-                    git clone https://github.com/yourusername/robot-tests.git
-                    cd robot-tests
-                    robot test_plus.robot
-                    EOF
-                    '''
-                }
+                sh '''
+                git clone https://github.com/yourusername/robot-tests.git
+                cd robot-tests
+                robot test_plus.robot
+                '''
             }
         }
         stage('Deploy to VM3 (Pre-Prod)') {
+            agent { label 'vm3' }
             steps {
-                sshagent(['vm3-ssh-key']) {
-                    sh '''
-                    ssh user@vm3 << EOF
-                    docker pull $REGISTRY/$IMAGE_NAME:$IMAGE_TAG
-                    docker run -d -p 5000:5000 $REGISTRY/$IMAGE_NAME:$IMAGE_TAG
-                    EOF
-                    '''
-                }
+                sh '''
+                docker pull $REGISTRY/$IMAGE_NAME:$IMAGE_TAG
+                docker run -d -p 5000:5000 $REGISTRY/$IMAGE_NAME:$IMAGE_TAG
+                '''
             }
         }
     }
