@@ -1,4 +1,7 @@
 pipeline {
+    agent {
+        label 'master'
+    }
     environment {
         REGISTRY = "ghcr.io/nnongta"
         IMAGE_NAME = "simple-api"
