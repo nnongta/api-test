@@ -33,7 +33,7 @@ pipeline {
         stage('Push to Registry') {
             agent { label 'vm2' }
             steps {
-                withDockerRegistry([credentialsId: 'thanita', url: "https://ghcr.io"]) {
+                withDockerRegistry([credentialsId: 'github-access', url: "https://ghcr.io"]) {
                     sh 'docker push $REGISTRY/$IMAGE_NAME:$IMAGE_TAG'
                 }
             }
