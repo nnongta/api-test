@@ -36,11 +36,12 @@ pipeline {
                 withCredentials([usernamePassword(credentialsId: 'github-access', usernameVariable: 'USERNAME', passwordVariable: 'TOKEN')]) {
                     sh '''
                     echo $TOKEN | docker login ghcr.io -u $USERNAME --password-stdin
+                    docker push $REGISTRY/$IMAGE_NAME:$IMAGE_TAG
                     '''
                 }
-
             }
         }
+
         stage('Deploy to VM2') {
             agent { label 'vm2' }
             steps {
