@@ -6,6 +6,8 @@ pipeline {
         REGISTRY = "ghcr.io/nnongta"
         IMAGE_NAME = "simple-api"
         IMAGE_TAG = "latest"
+        ROBOT_REPO = 'https://github.com/sdpxultimate/jenkins-robot'
+        ROBOT_BRANCH = 'main'
     }
         stages {
         stage('Install & Run Unittest') {
