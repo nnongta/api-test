@@ -14,7 +14,7 @@ pipeline {
                 
                     sh '''
                     rm -r api-test
-                    git clone https://$USERNAME:$TOKEN@github.com/nnongta/api-test.git
+                    git clone https://github.com/nnongta/api-test.git
                     cd api-test
                     '''
                 
