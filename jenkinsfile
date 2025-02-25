@@ -13,6 +13,7 @@ pipeline {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'github-access', usernameVariable: 'USERNAME', passwordVariable: 'TOKEN')]) {
                     sh '''
+                    rm api-test
                     git clone https://$USERNAME:$TOKEN@github.com/nnongta/api-test.git
                     cd api-test
                     '''
