@@ -28,6 +28,16 @@ pipeline {
             }
         }
 
+        stage('Run Unit Tests') {
+            agent { label 'vm2' }
+            steps {
+                sh '''
+                cd api-test
+                python unit_test.py
+                '''
+            }
+        }
+
         stage('Build Docker Image') {
             agent { label 'vm2' }
             steps {
@@ -40,15 +50,7 @@ pipeline {
         }
 
 
-        stage('Run Unit Tests') {
-            agent { label 'vm2' }
-            steps {
-                sh '''
-                cd api-test
-                python unit_test.py
-                '''
-            }
-        }
+        
         
         stage('Push to Registry') {
             agent { label 'vm2' }
