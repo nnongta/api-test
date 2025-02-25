@@ -7,84 +7,57 @@ pipeline {
         IMAGE_NAME = "simple-api"
         IMAGE_TAG = "latest"
     }
-    stages {
-        stage('Clone Repo') {
-            agent { label 'vm2' }
+        stages {
+        stage('Install & Run Unittest') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'github-access', usernameVariable: 'USERNAME', passwordVariable: 'TOKEN')]) {
-                    sh '''
-                    git clone https://$USERNAME:$TOKEN@github.com/nnongta/api-test.git
-                    cd api-test
-                    git checkout main
-                    '''
+                sh "pip install -r requirements.txt"
+                sh "python3 unit_test.py"
+            }
+        }
+
+        stage('Create Image') {
+            steps {
+                sh "docker build -t ${IMAGE_NAME}:${BUILD_ID} ."
+            }
+        }
+
+        stage('Run Container & Run Robot Testing') {
+            steps {
+                sh "docker run -dp 5001:5001 --name ${APP_NAME} ${IMAGE_NAME}:${BUILD_ID}"
+                git branch: "${ROBOT_BRANCH}", url: "${ROBOT_REPO}"
+                sh "robot plus.robot"
+            }
+
+            post {
+                always {
+                    sh returnStatus: true, script: "docker stop ${APP_NAME}"
+                    sh returnStatus: true, script: "docker rm ${APP_NAME}"
                 }
             }
-        }
-        stage('Run Unit Tests') {
-            agent { label 'vm2' }
-            steps {
-                sh '''
-                cd api-test
-                python3 -m venv venv
-                source venv/bin/activate
-                pip install -r requirements.txt
-                '''
-            }
-        }
-        stage('Build Docker Image') {
-            agent { label 'vm2' }
-            steps {
-                sh '''
-                cd api-test
-                docker build -t $REGISTRY/$IMAGE_NAME:$IMAGE_TAG .
-                '''
-            }
+        
         }
         stage('Push to Registry') {
-            agent { label 'vm2' }
             steps {
-                withCredentials([usernamePassword(credentialsId: 'github-access', usernameVariable: 'USERNAME', passwordVariable: 'TOKEN')]) {
-                    sh '''
-                    echo $TOKEN | docker login ghcr.io -u $USERNAME --password-stdin
-                    docker push $REGISTRY/$IMAGE_NAME:$IMAGE_TAG
-                    '''
-                }
+                sh 'echo $REGISTRY_CREDENTIALS_PSW  | docker login ghcr.io -u $REGISTRY_CREDENTIALS_USR --password-stdin'
+                sh "docker push ${IMAGE_NAME}:${BUILD_ID}"
             }
         }
-        stage('Deploy to VM2') {
-            agent { label 'vm2' }
-            steps {
-                sh '''
-                docker pull $REGISTRY/$IMAGE_NAME:$IMAGE_TAG
-                docker stop simple-api-container || true
-                docker rm -f simple-api-container || true
-                docker run -d --name simple-api-container -p 5000:5000 $REGISTRY/$IMAGE_NAME:$IMAGE_TAG
-                '''
-            }
-        }
-        stage('Run Robot Tests on VM2') {
-            agent { label 'vm2' }
-            steps {
-                withCredentials([usernamePassword(credentialsId: 'github-access', usernameVariable: 'USERNAME', passwordVariable: 'TOKEN')]) {
-                    sh '''
-                    rm -rf robot-tests
-                    git clone https://$USERNAME:$TOKEN@github.com/yourusername/robot-tests.git
-                    cd robot-tests
-                    robot test_plus.robot
-                    '''
-                }
-            }
-        }
+
         stage('Deploy to VM3 (Pre-Prod)') {
             agent { label 'vm3' }
             steps {
-                sh '''
-                docker pull $REGISTRY/$IMAGE_NAME:$IMAGE_TAG
-                docker stop simple-api-container || true
-                docker rm -f simple-api-container || true
-                docker run -d --name simple-api-container -p 5000:5000 $REGISTRY/$IMAGE_NAME:$IMAGE_TAG
-                '''
+                sh returnStatus: true, script: "docker stop ${APP_NAME}"
+                sh returnStatus: true, script: "docker rm ${APP_NAME}"
+                sh 'echo $REGISTRY_CREDENTIALS_PSW  | docker login ghcr.io -u $REGISTRY_CREDENTIALS_USR --password-stdin'
+                sh "docker run -dp 5001:5001 --name ${APP_NAME} ${IMAGE_NAME}:${BUILD_ID}"
             }
         }
     }
+
+    post {
+        always {
+            sh "docker system prune -af"
+        }
+    }
+    
 }
