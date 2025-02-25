@@ -15,7 +15,6 @@ pipeline {
                     sh '''
                     git clone https://$USERNAME:$TOKEN@github.com/nnongta/api-test.git
                     cd api-test
-                    git checkout main
                     '''
                 }
             }
