@@ -21,6 +21,13 @@ pipeline {
         //     }
         // }
 
+        stage("Build") {
+            steps {
+                sh "docker build --tag ${IMAGE_NAME} ."
+                sh "docker image ls"
+            }
+        }
+
         stage('Build Docker Image') {
             agent { label 'vm2' }
             steps {
@@ -32,7 +39,7 @@ pipeline {
             }
         }
 
-        
+
         stage('Run Unit Tests') {
             agent { label 'vm2' }
             steps {
