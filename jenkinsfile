@@ -11,13 +11,13 @@ pipeline {
         stage('Clone Repo') {
             agent { label 'vm2' }
             steps {
-                withCredentials([usernamePassword(credentialsId: 'github-access', usernameVariable: 'USERNAME', passwordVariable: 'TOKEN')]) {
+                
                     sh '''
                     rm -r api-test
                     git clone https://$USERNAME:$TOKEN@github.com/nnongta/api-test.git
                     cd api-test
                     '''
-                }
+                
             }
         }
         stage('Run Unit Tests') {
