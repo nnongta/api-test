@@ -9,10 +9,20 @@ pipeline {
         ROBOT_REPO = 'https://github.com/nnongta/jenkins-robot'
         ROBOT_BRANCH = 'main'
     }
-        stages {
+    
+    stages {
+        stage('Install Dependencies') {
+            steps {
+                sh """
+                    which python3 || sudo apt update && sudo apt install -y python3 python3-pip
+                    which docker || sudo apt update && sudo apt install -y docker.io
+                """
+            }
+        }
+
         stage('Install & Run Unittest') {
             steps {
-                sh "pip install -r requirement.txt"
+                sh "pip3 install -r requirement.txt"
                 sh "python3 unit_test.py"
             }
         }
@@ -25,22 +35,22 @@ pipeline {
 
         stage('Run Container & Run Robot Testing') {
             steps {
-                sh "docker run -dp 5001:5001 --name ${APP_NAME} ${IMAGE_NAME}:${BUILD_ID}"
+                sh "docker run -dp 5001:5001 --name ${IMAGE_NAME} ${IMAGE_NAME}:${BUILD_ID}"
                 git branch: "${ROBOT_BRANCH}", url: "${ROBOT_REPO}"
                 sh "robot plus.robot"
             }
 
             post {
                 always {
-                    sh returnStatus: true, script: "docker stop ${APP_NAME}"
-                    sh returnStatus: true, script: "docker rm ${APP_NAME}"
+                    sh "docker stop ${IMAGE_NAME} || true"
+                    sh "docker rm ${IMAGE_NAME} || true"
                 }
             }
-        
         }
+
         stage('Push to Registry') {
             steps {
-                sh 'echo $REGISTRY_CREDENTIALS_PSW  | docker login ghcr.io -u $REGISTRY_CREDENTIALS_USR --password-stdin'
+                sh 'echo $REGISTRY_CREDENTIALS_PSW | docker login ghcr.io -u $REGISTRY_CREDENTIALS_USR --password-stdin'
                 sh "docker push ${IMAGE_NAME}:${BUILD_ID}"
             }
         }
@@ -48,18 +58,17 @@ pipeline {
         stage('Deploy to VM3 (Pre-Prod)') {
             agent { label 'vm3' }
             steps {
-                sh returnStatus: true, script: "docker stop ${APP_NAME}"
-                sh returnStatus: true, script: "docker rm ${APP_NAME}"
-                sh 'echo $REGISTRY_CREDENTIALS_PSW  | docker login ghcr.io -u $REGISTRY_CREDENTIALS_USR --password-stdin'
-                sh "docker run -dp 5001:5001 --name ${APP_NAME} ${IMAGE_NAME}:${BUILD_ID}"
+                sh "docker stop ${IMAGE_NAME} || true"
+                sh "docker rm ${IMAGE_NAME} || true"
+                sh 'echo $REGISTRY_CREDENTIALS_PSW | docker login ghcr.io -u $REGISTRY_CREDENTIALS_USR --password-stdin'
+                sh "docker run -dp 5001:5001 --name ${IMAGE_NAME} ${IMAGE_NAME}:${BUILD_ID}"
             }
         }
     }
 
     post {
         always {
-            sh "docker system prune -af"
+            sh "docker system prune -af || true"
         }
     }
-    
 }
