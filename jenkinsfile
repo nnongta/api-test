@@ -21,6 +21,14 @@ pipeline {
         //     }
         // }
 
+        stage("Remove old images/containers"){
+            steps{
+                sh "docker stop \$(docker ps -a -q) || true"
+                sh "docker rm \$(docker ps -a -q) || true"
+                sh "docker rmi -f \$(docker images -q) || true"
+            }
+        }
+
         stage("Build") {
             steps {
                 sh "docker build --tag ${IMAGE_NAME} ."
