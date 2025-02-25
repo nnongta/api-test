@@ -51,7 +51,6 @@ pipeline {
                 }
             }
         }
-
         stage('Deploy to VM2') {
             agent { label 'vm2' }
             steps {
