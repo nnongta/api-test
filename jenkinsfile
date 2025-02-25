@@ -22,7 +22,7 @@ pipeline {
 
         stage('Install & Run Unittest') {
             steps {
-                sh "python3 -m pip install -r requirement.txt"
+                sh "pipx install -r requirement.txt"
                 sh "python3 unit_test.py"
             }
         }
