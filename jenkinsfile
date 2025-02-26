@@ -75,8 +75,8 @@ pipeline {
 
             post {
                 always {
-                    docker rm -f simple-api-container || true
-                    docker stop simple-api-container || true
+                    sh "docker rm -f simple-api-container || true"
+                    sh "docker stop simple-api-container || true"
                 }
             }
         }
