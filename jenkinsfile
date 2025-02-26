@@ -1,6 +1,6 @@
 pipeline {
     agent {
-        label 'master'
+        label 'vm2'
     }
     environment {
         REGISTRY = "ghcr.io/nnongta"
@@ -37,7 +37,6 @@ pipeline {
         }
 
         stage('Run Unit Tests') {
-            agent { label 'vm2' }
             steps {
                 sh '''
                 cd api-test
@@ -48,7 +47,6 @@ pipeline {
         }
 
         stage('Build Docker Image') {
-            agent { label 'vm2' }
             steps {
                 sh '''
                 docker --version || { echo "Docker is not installed!"; exit 1; }
@@ -62,7 +60,7 @@ pipeline {
         
         
         stage('Push to Registry') {
-            agent { label 'vm2' }
+            
             steps {
                 withCredentials([usernamePassword(credentialsId: 'github-access', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
                     sh '''
@@ -75,7 +73,6 @@ pipeline {
             }
         }
         stage('Deploy to VM2') {
-            agent { label 'vm2' }
             steps {
                 sh '''
                 docker pull $REGISTRY/$IMAGE_NAME:$IMAGE_TAG
@@ -86,7 +83,7 @@ pipeline {
             }
         }
         stage('Run Robot Tests on VM2') {
-            agent { label 'vm2' }
+            
             steps {
                 withCredentials([usernamePassword(credentialsId: 'github-access', usernameVariable: 'USERNAME', passwordVariable: 'TOKEN')]) {
                     sh '''
