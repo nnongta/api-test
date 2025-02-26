@@ -8,19 +8,6 @@ pipeline {
         IMAGE_TAG = "latest"
     }
     stages {
-        // stage('Clone Repo') {
-        //     agent { label 'vm2' }
-        //     steps {
-                
-        //             sh '''
-        //             rm -r api-test
-        //             // git clone https://github.com/nnongta/api-test.git
-        //             cd api-test
-        //             '''
-                
-        //     }
-        // }
-
         stage("Remove old images/containers"){
         
             steps{
@@ -42,7 +29,7 @@ pipeline {
                 sh '''
                 cd api-test
                 docker run -d -p 5000:5000 ${IMAGE_NAME}
-                python unit_test.py
+                python3 unit_test.py
                 '''
             }
         }
