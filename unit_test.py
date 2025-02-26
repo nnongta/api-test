@@ -68,6 +68,24 @@ class AppTestCase(unittest.TestCase):
         response, status_code = app.plus("a", "a")
         self.assertEqual(response.json, {"error_msg": "inputs must be numbers"})
         self.assertEqual(status_code, 400)
+    
+    def test_x_is_1(self):
+        response, status_code = app.area("1")
+        self.assertEqual(response.json, {"radius": 1.0, "area": "3.14"})
+        self.assertEqual(status_code, 200)
+    
+    def test_x_is_neg10(self):
+        response, status_code = app.area("-10")
+        self.assertEqual(response.json, {"radius": -10.0, "area": "0.00"})
+        self.assertEqual(status_code, 200)
+    
+    def test_x_is_1dot5(self):
+        response, status_code = app.area("1.5")
+        self.assertEqual(response.json, {"radius": 1.5, "area": "7.07"})
+        self.assertEqual(status_code, 200)
+
+
+
 
 if __name__ == "__main__":
     unittest.main()

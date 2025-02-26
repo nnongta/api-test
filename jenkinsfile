@@ -84,9 +84,16 @@ pipeline {
             agent { label 'vm3' }
             steps {
                 sh '''
-                docker stop simple-api-container || true
-                docker rm -f simple-api-container || true
-                docker run -d --name simple-api-container -p 5000:5000 $REGISTRY/$IMAGE_NAME:$IMAGE_TAG
+                set -x
+                
+                if [ "$(docker ps -q -f name=simple-api-container)" ]; then
+                    docker stop simple-api-container
+                    docker rm simple-api-container
+                fi
+
+                docker run -d --name simple-api-container -p 5001:5001 $REGISTRY/$IMAGE_NAME:$IMAGE_TAG
+
+                docker ps | grep simple-api-container || { echo "Container failed to start!" && exit 1; }
                 '''
             }
         }
