@@ -69,9 +69,14 @@ pipeline {
                     rm -rf ./jenkins-robot
                     git clone https://github.com/nnongta/jenkins-robot.git
                     robot plus.robot || { echo "Robot tests failed"; exit 1; }
+                    '''
+                }
+            }
+
+            post {
+                always {
                     docker rm -f simple-api-container || true
                     docker stop simple-api-container || true
-                    '''
                 }
             }
         }
