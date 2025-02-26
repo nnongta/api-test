@@ -29,6 +29,7 @@ pipeline {
                 sh '''
                 cd api-test
                 docker run -d -p 5000:5000 ${IMAGE_NAME}
+                pip install -r requirement.txt
                 python3 unit_test.py
                 '''
             }
