@@ -91,7 +91,7 @@ pipeline {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'github-access', usernameVariable: 'USERNAME', passwordVariable: 'TOKEN')]){
                     sh '''
-                    echo -n $PASSWORD | docker login ghcr.io -u $USERNAME --password-stdin
+                    echo $TOKEN | docker login ghcr.io -u $USERNAME --password-stdin
                     docker stop simple-api-container || true
                     docker rm -f simple-api-container || true
                     docker run -d --name simple-api-container -p 5001:5001 $REGISTRY/$IMAGE_NAME:$IMAGE_TAG
