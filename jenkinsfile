@@ -35,26 +35,14 @@ pipeline {
             }
         } 
         
-        stage('Push to Registry') {
-            
-            steps {
-                withCredentials([usernamePassword(credentialsId: 'github-access', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-                    sh '''
-                    echo $PASSWORD | docker login ghcr.io -u $USERNAME --password-stdin
-                    for i in {1..3}; do
-                        docker push $REGISTRY/$IMAGE_NAME:$IMAGE_TAG && break || sleep 10
-                    done
-                    '''
-                }
-            }
-        }
+        
         stage('Deploy to VM2') {
             
             steps {
                 withCredentials([usernamePassword(credentialsId: 'github-access', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]){
                     sh '''
                     
-                    docker run -d --name simple-api-container -p 5000:5000 $REGISTRY/$IMAGE_NAME:$IMAGE_TAG
+                    docker run -d --name simple-api-container -p 5001:5001 $REGISTRY/$IMAGE_NAME:$IMAGE_TAG
                     
                     '''
                 }
@@ -84,15 +72,32 @@ pipeline {
                 }
             }
         }
+        stage('Push to Registry') {
+            
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'github-access', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                    sh '''
+                    echo $PASSWORD | docker login ghcr.io -u $USERNAME --password-stdin
+                    for i in {1..3}; do
+                        docker push $REGISTRY/$IMAGE_NAME:$IMAGE_TAG && break || sleep 10
+                    done
+                    '''
+                }
+            }
+        }
+
         stage('Deploy to VM3 (Pre-Prod)') {
             agent { label 'vm3' }
             steps {
-                withCredentials([usernamePassword(credentialsId: 'github-access', usernameVariable: 'USERNAME', passwordVariable: 'TOKEN')])
+                withCredentials([usernamePassword(credentialsId: 'github-access', usernameVariable: 'USERNAME', passwordVariable: 'TOKEN')]){
                     sh '''
+                    echo $TOKEN | docker login ghcr.io -u $USERNAME --password-stdin
                     docker stop simple-api-container || true
                     docker rm -f simple-api-container || true
                     docker run -d --name simple-api-container -p 5001:5001 $REGISTRY/$IMAGE_NAME:$IMAGE_TAG
                     '''
+                }
+                    
             }
         }
     }
