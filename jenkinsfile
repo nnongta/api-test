@@ -68,7 +68,6 @@ pipeline {
                     sh '''
                     rm -rf robot-tests
                     git clone https://github.com/nnongta/jenkins-robot.git
-                    cd robot-tests
                     robot test_plus.robot || { echo "Robot tests failed"; exit 1; }
                     '''
                 }
