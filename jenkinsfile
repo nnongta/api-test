@@ -66,9 +66,8 @@ pipeline {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'github-access', usernameVariable: 'USERNAME', passwordVariable: 'TOKEN')]) {
                     sh '''
-                    rm -rf robot-tests
                     git clone https://github.com/nnongta/jenkins-robot.git
-                    robot test_plus.robot || { echo "Robot tests failed"; exit 1; }
+                    robot plus.robot || { echo "Robot tests failed"; exit 1; }
                     '''
                 }
             }
