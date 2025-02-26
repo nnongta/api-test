@@ -70,7 +70,7 @@ pipeline {
                     git clone https://github.com/nnongta/jenkins-robot.git
                     cd ./jenkins-robot
                     python3 -m venv venv
-                    . ./source/bin/activate
+                    . ./venv/bin/activate
                     robot --version
                     robot plus.robot || { echo "Robot tests failed"; exit 1; }
                     '''
