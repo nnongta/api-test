@@ -2,9 +2,9 @@ FROM python:3.7-alpine AS builder
 
 WORKDIR /app
 
-COPY ./requirement.txt .
+COPY ./requirements.txt .
 
-RUN pip install --no-cache-dir -r requirement.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
 FROM python:3.7-alpine AS production
 
