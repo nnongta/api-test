@@ -1,6 +1,6 @@
 pipeline {
     agent {
-        label 'master'
+        label 'vm2'
     }
     environment {
         REGISTRY = "ghcr.io/nnongta"
