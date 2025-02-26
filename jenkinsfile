@@ -62,7 +62,7 @@ pipeline {
             }
         }
         stage('Deploy to VM2') {
-            agent { label 'vm2' }
+            
             steps {
                 withCredentials([usernamePassword(credentialsId: 'github-access', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]){
                     sh '''
@@ -76,7 +76,7 @@ pipeline {
             }
         }
         stage('Run Robot Tests on VM2') {
-            agent { label 'vm2' }
+    
             steps {
                 withCredentials([usernamePassword(credentialsId: 'github-access', usernameVariable: 'USERNAME', passwordVariable: 'TOKEN')]) {
                     sh '''
