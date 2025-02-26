@@ -66,6 +66,7 @@ pipeline {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'github-access', usernameVariable: 'USERNAME', passwordVariable: 'TOKEN')]) {
                     sh '''
+                    rm -rf ./jenkins-robot
                     git clone https://github.com/nnongta/jenkins-robot.git
                     robot plus.robot || { echo "Robot tests failed"; exit 1; }
                     docker rm -f simple-api-container || true
