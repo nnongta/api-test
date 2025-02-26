@@ -87,11 +87,12 @@ pipeline {
         stage('Deploy to VM3 (Pre-Prod)') {
             agent { label 'vm3' }
             steps {
-                sh '''
-                docker stop simple-api-container || true
-                docker rm -f simple-api-container || true
-                docker run -d --name simple-api-container -p 5001:5001 $REGISTRY/$IMAGE_NAME:$IMAGE_TAG
-                '''
+                withCredentials([usernamePassword(credentialsId: 'github-access', usernameVariable: 'USERNAME', passwordVariable: 'TOKEN')])
+                    sh '''
+                    docker stop simple-api-container || true
+                    docker rm -f simple-api-container || true
+                    docker run -d --name simple-api-container -p 5001:5001 $REGISTRY/$IMAGE_NAME:$IMAGE_TAG
+                    '''
             }
         }
     }
