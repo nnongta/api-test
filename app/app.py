@@ -52,16 +52,23 @@ def plus(num1, num2):
         
         return res, 200
     
-@app.route('/cir_area/<num_x>', methods=['GET'])
-def area(num_x):
-    try:
-        radius = float(num_x)
-        if radius < 0:
-            return jsonify({"radius": radius, "area": "0.00"})
-        area = round(3.14 * radius * radius, 2)
-        return jsonify({"radius": radius, "area": f"{area:.2f}"})
-    except ValueError:
-        return jsonify({"error": "Invalid input. Please provide a number."}), 400
+@app.route('/cir_sur/<num>', methods=['GET'])
+def cir_sur(num):
+    with app.app_context():
+        try:
+            num = float(num)
+            if num < 0:
+                results = 0.00
+            else:
+                results = 4 * 3.14 * pow(num, 2)
+        except:
+            results = { 'error_msg' : 'input must be a number' }
+            res = jsonify(results)
+            return results, 400
+
+        resp = jsonify(results)
+        
+        return resp, 200
 
 
 if __name__ == '__main__':
