@@ -67,7 +67,7 @@ pipeline {
                 withCredentials([usernamePassword(credentialsId: 'github-access', usernameVariable: 'USERNAME', passwordVariable: 'TOKEN')]) {
                     sh '''
                     rm -rf robot-tests
-                    git clone https://$USERNAME:$TOKEN@github.com/yourusername/robot-tests.git
+                    git clone https://github.com/nnongta/jenkins-robot.git
                     cd robot-tests
                     robot test_plus.robot || { echo "Robot tests failed"; exit 1; }
                     '''
