@@ -6,7 +6,7 @@ app = Flask(__name__)
 
 @app.route('/getcode', methods=['GET'])
 def getcode():
-    return "Heloooooooooooooooooooooooooooooooooooo"
+    return "Heloooooooooooooooooooooooooooooooooooo iknow"
 
 @app.route('/is_prime/<num>', methods=['GET'])
 def is_prime(num):
