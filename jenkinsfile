@@ -40,7 +40,6 @@ pipeline {
             steps {
                 sh '''
                 docker --version || { echo "Docker is not installed!"; exit 1; }
-                cd api-test
                 docker build -t $REGISTRY/$IMAGE_NAME:$IMAGE_TAG .
                 '''
             }
